@@ -9,7 +9,9 @@
 -dontwarn android.**
 
 -keep class android.** { *;}
-
+-keep class *.** { *;}
+-keep class org.jeson.reinforce.shell.$$$.processor.ApplicationDefaultProcessor { }
+-keep class org.jeson.reinforce.shell.$$$.processor.ApplicationMergeProcessor { }
 
 ############################################### Android开发中一些需要保留的公共部分############################################### 保留我们使用的四大组件，自定义的Application等等这些类不被混淆# 因为这些子类都有可能被外部调用
 -keep public class * extends android.**

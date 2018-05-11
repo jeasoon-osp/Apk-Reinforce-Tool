@@ -20,18 +20,19 @@ public class DexPretendMergeStrategy extends DexPretendDefaultStrategy {
         boolean isSuccess = cloneShellDex(tmpFile);
         long dataOffset = tmpFile.size();
         isSuccess &= appendDex(tmpFile, dstMainClassName, dexFilesToAppend, encrypt);
-        isSuccess &= fixDataOffset(tmpFile, dataOffset);
+        isSuccess &= appendDataOffset(tmpFile, dataOffset);
         byte[] bytes = tmpFile.bytes();
         isSuccess &= fixFileSizeHeader(bytes);
         isSuccess &= fixSha1Header(bytes);
         isSuccess &= fixCheckSumHeader(bytes);
         isSuccess &= clearDexAppended(dexFilesToAppend);
+        FileUtil.write(bytes, tmpFile.create(false));
         FileUtil.delete(dstDexPath);
         isSuccess &= tmpFile.file().renameTo(new java.io.File(dstDexPath));
         return isSuccess;
     }
 
-    protected boolean fixDataOffset(DexFile dexFile, long dataOffset) {
+    protected boolean appendDataOffset(DexFile dexFile, long dataOffset) {
         DataOutputStream out = null;
         try {
             out = new DataOutputStream(dexFile.create(true));
@@ -76,7 +77,7 @@ public class DexPretendMergeStrategy extends DexPretendDefaultStrategy {
             return false;
         }
         Adler32 adler32 = new Adler32();
-        adler32.update(bytes);
+        adler32.update(bytes, 12, bytes.length - 12);
         byte[] adler32Bytes = Util.reverse(Util.intToBytes((int) adler32.getValue()));
         System.arraycopy(adler32Bytes, 0, bytes, 8, 4);
         return true;

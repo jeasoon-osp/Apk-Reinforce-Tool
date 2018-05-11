@@ -349,4 +349,19 @@ public class FileUtil {
         return new ArrayList<>();
     }
 
+    public static boolean write(byte[] bytes, OutputStream outputStream){
+        if (bytes == null || outputStream == null) {
+            return false;
+        }
+        try {
+            outputStream.write(bytes);
+            outputStream.flush();
+            return true;
+        }catch (Exception e){
+            return false;
+        }finally {
+            closeIO(outputStream);
+        }
+    }
+
 }

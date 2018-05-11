@@ -40,7 +40,7 @@ public class Util {
                 return false;
             }
             byte[] buffer = new byte[1024];
-            int len;
+            int    len;
             while ((len = inputStream.read(buffer)) != -1) {
                 outputStream.write(buffer, 0, len);
                 outputStream.flush();
@@ -159,31 +159,36 @@ public class Util {
         return false;
     }
 
-    public static byte[] readDataFromZipFile(File srcFile, String fileName, long offset, long length) {
+    public static long readLongFromZipFile(File srcFile, File tempFile, String fileName, long offset) {
         List<Closeable> closeableList = new ArrayList<>();
         try {
             ZipFile zipFile = new ZipFile(srcFile);
             closeableList.add(zipFile);
             ZipEntry fileEntry = zipFile.getEntry(fileName);
             if (fileEntry == null) {
-                return null;
+                return -1;
             }
-            InputStream entryIn = zipFile.getInputStream(fileEntry);
-            closeableList.add(entryIn);
-            if (offset < 0) {
-                offset = entryIn.available() + offset;
-            }
-            entryIn.skip(offset);
-            byte[] bytes = new byte[(int) length];
-            entryIn.read(bytes);
-            Util.closeIO(entryIn);
-            closeableList.remove(entryIn);
-            Util.closeIO(zipFile);
+            FileOutputStream tmpOut = new FileOutputStream(tempFile);
+            closeableList.add(tmpOut);
+            readAndWriteData(zipFile.getInputStream(fileEntry), tmpOut);
+            closeIO(tmpOut);
             closeableList.remove(zipFile);
-            return bytes;
+            closeableList.remove(tmpOut);
+            DataInputStream inputStream = new DataInputStream(new FileInputStream(tempFile));
+            closeableList.add(inputStream);
+            if (offset < 0) {
+                offset = tempFile.length() + offset;
+            }
+            inputStream.skip(offset);
+            long result = inputStream.readLong();
+            Util.closeIO(inputStream);
+            Util.closeIO(zipFile);
+            closeableList.remove(inputStream);
+            tempFile.delete();
+            return result;
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            return -1;
         } finally {
             Util.closeIO(closeableList);
         }
@@ -225,12 +230,12 @@ public class Util {
             if (!dirName.endsWith("/")) {
                 dirName = dirName + "/";
             }
-            File libDir = dstDir;
-            ZipFile zipFile = new ZipFile(srcFile);
+            File                            libDir  = dstDir;
+            ZipFile                         zipFile = new ZipFile(srcFile);
             Enumeration<? extends ZipEntry> entries = zipFile.entries();
             while (entries.hasMoreElements()) {
-                ZipEntry entry = entries.nextElement();
-                String entryName = entry.getName();
+                ZipEntry entry     = entries.nextElement();
+                String   entryName = entry.getName();
                 System.err.println("dstDir = " + dstDir.getAbsolutePath());
                 System.err.println("entryName = " + entryName);
                 if (!entryName.startsWith(dirName)) {
@@ -238,7 +243,7 @@ public class Util {
                 }
                 InputStream entryIn = zipFile.getInputStream(entry);
                 closeableList.add(entryIn);
-                File lib = new File(dstDir, entryName.substring(dirName.length()));
+                File lib        = new File(dstDir, entryName.substring(dirName.length()));
                 File parentFile = lib.getParentFile();
                 if (!parentFile.exists()) {
                     parentFile.mkdirs();

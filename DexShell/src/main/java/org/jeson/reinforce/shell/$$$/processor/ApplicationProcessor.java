@@ -15,18 +15,7 @@ import java.util.Map;
 
 public abstract class ApplicationProcessor {
 
-    public static final ApplicationProcessor DEFAULT;
-
-    static {
-        ApplicationProcessor processor = null;
-        try {
-            processor = (ApplicationProcessor) Class.forName(ProcessorDefault.DEFAULT_PROCESSOR_NAME).newInstance();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            DEFAULT = processor;
-        }
-    }
+    public static final ApplicationProcessor DEFAULT = ReflectUtil.newInstance(ProcessorDefault.DEFAULT_PROCESSOR_NAME);
 
     public void onAppClassInit() {
         File cacheDexDir = ApplicationUtil.getCacheDexDir();
