@@ -9,7 +9,7 @@
 -dontwarn android.**
 
 -keep class android.** { *;}
--keep class *.** { *;}
+#-keep class *.** { *;}
 -keep class org.jeson.reinforce.shell.$$$.processor.ApplicationDefaultProcessor { }
 -keep class org.jeson.reinforce.shell.$$$.processor.ApplicationMergeProcessor { }
 
