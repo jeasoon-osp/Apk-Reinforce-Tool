@@ -1,0 +1,13 @@
+.DS_Store
+.gradle
+.idea
+temp
+gradle*
+out
+build
+*.iml
+DecodeAndEncode.jar
+ApkReinforceTool.jar
+classes.dex
+temp.apk
+Artifacts

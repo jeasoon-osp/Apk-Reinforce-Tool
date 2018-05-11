@@ -1,0 +1,36 @@
+
+compileJava{
+    dependsOn ":ReinforceTool:assembleTool"
+    doLast {
+        def dstFile = file("$projectDir.absolutePath/src/main/resources/tool/ApkReinforceTool.jar")
+        def dstParentFile = dstFile.parentFile
+        if (dstFile.exists()) {
+            dstFile.delete()
+        }else if (!dstParentFile.exists()) {
+            dstParentFile.mkdirs()
+        }
+        def reinforceToolProject = project(":ReinforceTool")
+        copy {
+            from "${reinforceToolProject.projectDir.absolutePath}/build/libs/$reinforceToolProject.name-${project.version}.jar"
+            into dstParentFile.absolutePath
+            rename "$reinforceToolProject.name-${project.version}.jar", "ApkReinforceTool.jar"
+        }
+        copy {
+            from "${reinforceToolProject.projectDir.absolutePath}/build/libs/$reinforceToolProject.name-${project.version}.jar"
+            into "$projectDir.absolutePath/tool/buildExe"
+            rename "$reinforceToolProject.name-${project.version}.jar", "ApkReinforceTool.jar"
+        }
+    }
+}
+
+jar{
+    manifest {
+        attributes 'Main-Class': 'org.jeson.reinforce.app.Main'
+    }
+}
+
+task assembleApp(dependsOn:  "assemble", group: "build"){
+    doLast {
+        println "assemble app success"
+    }
+}

@@ -1,0 +1,43 @@
+dependencies {
+    compile fileTree(dir: 'libs')
+    compile project(":DexShell")
+    testCompile 'junit:junit:4.12'
+}
+
+compileJava {
+    dependsOn ":DexShell:assembleDex"
+    doLast {
+        copy {
+            from "${project(":DexShell").projectDir.absolutePath}/out/dex/classes.dex"
+            into "$projectDir.absolutePath/src/main/resources/apk/dex/"
+        }
+    }
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'org.jeson.reinforcetool.Main'
+    }
+    from("libs")
+    fileTree("libs").forEach {
+        if (it.name.endsWith(".jar") || it.name.endsWith(".zip")) {
+            exclude(it.name)
+        }
+    }
+    from {
+        configurations.compile.collect {
+            if (it.absolutePath.contains("/libs/lib/")){
+                exclude(it.name)
+            }
+            it.isFile() && (it.getName().endsWith(".jar") || it.getName().endsWith(".zip")) ? zipTree(it) : it
+        }
+    }
+}
+
+task assembleTool(dependsOn: "assemble", group: "build") {
+    doLast {
+        println "assemble tool success"
+    }
+}
+
+

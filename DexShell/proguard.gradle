@@ -1,0 +1,43 @@
+buildscript {
+    repositories {
+        flatDir {
+            dirs file('tool').absolutePath
+        }
+    }
+    dependencies {
+        classpath ':proguard'
+    }
+}
+
+def ANDROID_SDK_HOME = System.getenv("ANDROID_SDK_HOME")
+if (ANDROID_SDK_HOME == null) {
+    throw new GradleException("you must secify ANDROID_SDK_HOME env, and then restart your IDE!")
+}
+for (int i = 28; i >= 14; i--) {
+    def android_jar_file = file("$ANDROID_SDK_HOME/platforms/android-$i/android.jar")
+    if (android_jar_file.exists()) {
+        rootProject.ext.android_jar_path = android_jar_file.absolutePath
+        break
+    }
+}
+if (rootProject.ext.android_jar_path == null) {
+    throw new GradleException("can't find android.jar file")
+} else {
+    println("use android.jar file $rootProject.ext.android_jar_path")
+}
+
+task proguard(type: proguard.gradle.ProGuardTask, dependsOn: jar) {
+
+    injars 'build/libs'
+    outjars 'out/proguard'
+    delete files("out/proguard")
+
+    def proguardConfig = file('proguard-rules.pro')
+    if (proguardConfig.exists()) {
+        configuration proguardConfig.absolutePath
+    }
+
+    libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
+    libraryjars rootProject.ext.android_jar_path
+
+}

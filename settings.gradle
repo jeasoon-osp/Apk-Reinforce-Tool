@@ -1,0 +1,5 @@
+rootProject.name = 'ApkReinforceTool'
+include 'DexShell'
+include 'ReinforceTool'
+include 'AppReinforceTool'
+

@@ -1,0 +1,22 @@
+apply from: 'proguard.gradle'
+
+dependencies {
+    compileOnly files(rootProject.ext.android_jar_path)
+}
+
+task jarToDex(type: Exec, group: "build", dependsOn: proguard, description: "generate dex file") {
+    def dstFile = file("$projectDir.absolutePath/out/dex/classes.dex")
+    def dstDir = dstFile.parentFile
+    if (dstFile.exists()) {
+        dstFile.delete()
+    }else if (!dstDir.exists()) {
+        dstDir.mkdirs()
+    }
+    commandLine "java", "-jar", "$projectDir.absolutePath/tool/dx.jar", "--dex", "--output=$dstFile.absolutePath", "$projectDir.absolutePath/out/proguard/$project.name-${project.version}.jar"
+}
+
+task assembleDex(dependsOn: jarToDex , group: "build"){
+    doLast {
+        println "assemble dex success"
+    }
+}

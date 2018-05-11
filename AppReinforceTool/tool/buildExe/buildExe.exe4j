@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<exe4j version="5.1" transformSequenceNumber="2">
+  <directoryPresets config="E:/project/idea_project/Apk-Reinforce-Tool/AppReinforceTool/tool/buildExe" />
+  <application name="ApkReinforceTool" distributionSourceDir="E:/project/idea_project/Apk-Reinforce-Tool/artifacts">
+    <languages>
+      <principalLanguage id="en" customLocalizationFile="" />
+    </languages>
+  </application>
+  <executable name="ApkReinforceTool" type="2" iconSet="true" iconFile="E:/project/idea_project/Apk-Reinforce-Tool/AppReinforceTool/tool/buildExe/res/app_icon.ico" executableDir="." redirectStderr="false" stderrFile="error.log" stderrMode="overwrite" redirectStdout="false" stdoutFile="output.log" stdoutMode="overwrite" failOnStderrOutput="true" executableMode="1" changeWorkingDirectory="true" workingDirectory="." singleInstance="false" serviceStartType="2" serviceDependencies="" serviceDescription="" jreLocation="" executionLevel="asInvoker" checkConsoleParameter="true" globalSingleInstance="false" singleInstanceActivate="true" dpiAware="false" amd64="true">
+    <messageSet />
+    <versionInfo include="false" fileVersion="" fileDescription="" legalCopyright="" internalName="" productName="" companyName="" productVersion="" />
+  </executable>
+  <splashScreen show="true" width="0" height="0" bitmapFile="E:/project/idea_project/Apk-Reinforce-Tool/AppReinforceTool/tool/buildExe/res/app_icon.png" windowsNative="false" textOverlay="false">
+    <text>
+      <statusLine x="20" y="20" text="" fontSize="8" fontColor="0,0,0" bold="false" />
+      <versionLine x="20" y="40" text="version %VERSION%" fontSize="8" fontColor="0,0,0" bold="false" />
+    </text>
+  </splashScreen>
+  <java mainClass="org.jeson.reinforce.app.Main" vmParameters="-Dexe.path=${EXE4J_EXEDIR}" arguments="" allowVMPassthroughParameters="true" preferredVM="client" bundleRuntime="true" minVersion="1.6" maxVersion="" allowBetaVM="true" jdkOnly="false">
+    <searchSequence>
+      <directory location="./jre" />
+      <registry />
+      <envVar name="JAVA_HOME" />
+      <envVar name="JDK_HOME" />
+      <envVar name="JRE_HOME" />
+    </searchSequence>
+    <classPath>
+      <archive location="E:/project/idea_project/Apk-Reinforce-Tool/AppReinforceTool/tool/buildExe/AppReinforceToo.jar" failOnError="false" />
+    </classPath>
+    <nativeLibraryDirectories />
+    <vmOptions />
+  </java>
+  <includedFiles />
+  <unextractableFiles />
+</exe4j>
