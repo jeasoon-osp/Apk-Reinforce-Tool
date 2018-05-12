@@ -71,12 +71,12 @@ public class Util {
     }
 
     public static String getOsArch() {
-        String arch = System.getProperty("os.arch");
+        String arch = System.getProperty("java.vm.name");
         if (arch == null) {
             return "x86_linux";
         }
         if (arch.contains("64")) {
-            arch = "x86_64";
+            arch = "x64";
         } else {
             arch = "x86";
         }
