@@ -5,6 +5,7 @@ import org.jeson.reinforcetool.file.DexFile;
 import org.jeson.reinforcetool.file.ManifestFile;
 import org.jeson.reinforcetool.log.Logger;
 import org.jeson.reinforcetool.util.FileUtil;
+import org.jeson.reinforcetool.util.ReflectUtil;
 import org.jeson.reinforcetool.util.Util;
 
 import java.io.File;
@@ -70,15 +71,15 @@ public class ReinforceProcessor implements ErrorCode {
         }
         // 解压apk
         ApkProcessor apkProcessor = new ApkProcessor(options.workspaceDirPath);
-        boolean      isSuccess    = apkProcessor.decodeApk(options.srcApkPath);
+        boolean isSuccess = apkProcessor.decodeApk(options.srcApkPath);
         if (!isSuccess) {
             cleanWorkspace();
             Logger.DEFAULT.error("decode apk failed!");
             return FAILED_APK_DECODE;
         }
         // 给清单文件添加指定的application
-        ManifestFile axmlFile        = apkProcessor.manifestFile();
-        String       dstAppClassName = new ManifestProcessor().process(axmlFile, axmlFile);
+        ManifestFile axmlFile = apkProcessor.manifestFile();
+        String dstAppClassName = new ManifestProcessor().process(axmlFile, axmlFile);
         //处理dex文件
         List<DexFile> dexFilesToAppend = apkProcessor.listWorkspaceDex();
         isSuccess = new DexPretendProcessor().process(apkProcessor.getAppOutDir(), dstAppClassName, dexFilesToAppend);
@@ -89,10 +90,10 @@ public class ReinforceProcessor implements ErrorCode {
         }
         // 添加lib库到apk工作空间lib目录下
         if (!Util.isEmptyText(options.libDir)) {
-            cloneSrcLibToWorkspaceLib(options.libDir, options.workspaceDirPath);
+            cloneSrcLibToWorkspaceLib(options.libDir,apkProcessor.getAppOutDir().path());
         }
         // 添加resource预置的lib库到apk工作空间lib目录下
-        cloneResourceLibToWorkspaceLib();
+        cloneResourceLibToWorkspaceLib(apkProcessor.getAppOutDir().path());
         // 回编
         isSuccess = apkProcessor.encodeApk(options.dstApkPath);
         if (!isSuccess) {
@@ -120,25 +121,28 @@ public class ReinforceProcessor implements ErrorCode {
     }
 
     private void prepareLibrary() {
-        File    libDir  = FileUtil.getTempDir();
+        File libDir = FileUtil.getTempDir();
         boolean success = FileUtil.cloneDirFromResource(LIB_RESOURCE, libDir.getAbsolutePath(), false);
         if (!success) {
             return;
         }
         File lib = new File(libDir, "lib/" + Util.getOsArch());
-        System.out.println(lib.getAbsolutePath());
         File[] files = lib.listFiles();
         if (files == null) {
             return;
         }
-        for (File file : files) {
-            try {
-                System.load(file.getAbsolutePath());
-            } catch (Throwable t) {
-                Logger.DEFAULT.error("load lib failed, name is " + file.getName(), t);
-                t.printStackTrace();
+        String libPath = System.getProperty("java.library.path");
+        if (Util.isEmptyText(libPath)) {
+            libPath = lib.getAbsolutePath();
+        } else {
+            if (Util.getOsType() == Util.OS_WIN) {
+                libPath += ";" + lib.getAbsolutePath();
+            } else {
+                libPath += ":" + lib.getAbsolutePath();
             }
         }
+        System.setProperty("java.library.path", libPath);
+        ReflectUtil.fieldStatic(ClassLoader.class, "usr_paths", ReflectUtil.invokeStatic(ClassLoader.class, "initializePath", new Class[]{String.class}, new Object[]{"java.library.path"}));
     }
 
     private boolean cleanWorkspace() {
@@ -153,7 +157,7 @@ public class ReinforceProcessor implements ErrorCode {
         }
     }
 
-    private boolean cloneResourceLibToWorkspaceLib() {
+    private boolean cloneResourceLibToWorkspaceLib(String dstLibDirPath) {
         InputStream inputStream = null;
         try {
             inputStream = getClass().getResourceAsStream("/apk/lib/lib.properties");
@@ -164,7 +168,7 @@ public class ReinforceProcessor implements ErrorCode {
             Properties properties = new Properties();
             properties.load(inputStream);
             for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-                String key   = entry.getKey().toString().trim();
+                String key = entry.getKey().toString().trim();
                 String value = entry.getValue().toString().trim();
                 if (Util.isEmptyText(key) || Util.isEmptyText(value)) {
                     continue;
@@ -175,7 +179,7 @@ public class ReinforceProcessor implements ErrorCode {
                     if (Util.isEmptyText(libName)) {
                         continue;
                     }
-                    cloneResourceLib(options.workspaceDirPath, key, libName);
+                    cloneResourceLib(dstLibDirPath, key, libName);
                 }
             }
             properties.clear();
@@ -190,11 +194,11 @@ public class ReinforceProcessor implements ErrorCode {
     }
 
     private boolean cloneResourceLib(String workspaceDirPath, String key, String libName) {
-        InputStream  inputStream  = null;
+        InputStream inputStream = null;
         OutputStream outputStream = null;
         try {
-            String libPath = "apk/lib/" + key + "/" + libName;
-            inputStream = getClass().getClassLoader().getResourceAsStream(libPath);
+            String libPath = "/apk/lib/" + key + "/lib" + libName + ".so";
+            inputStream = getClass().getResourceAsStream(libPath);
             if (inputStream == null) {
                 throw new RuntimeException("can't open file: " + libPath);
             }
@@ -207,7 +211,7 @@ public class ReinforceProcessor implements ErrorCode {
             } else if (dir.isFile()) {
                 throw new RuntimeException(dir.getAbsolutePath() + " is a file!");
             }
-            outputStream = new FileOutputStream(dir.getAbsolutePath() + File.separator + libName);
+            outputStream = new FileOutputStream(dir.getAbsolutePath() + File.separator + "lib" + libName + ".so");
             return FileUtil.readAndWriteData(inputStream, outputStream);
         } catch (Exception e) {
             Logger.DEFAULT.error(e.getMessage(), e);

@@ -1,5 +1,8 @@
 package org.jeson.reinforcetool.util;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
 public class ReflectUtil {
 
     private ReflectUtil() {
@@ -31,11 +34,36 @@ public class ReflectUtil {
             return null;
         }
         try {
-            return clazz.getDeclaredMethod(name, classes).invoke(null, objects);
+            Method method = clazz.getDeclaredMethod(name, classes);
+            if (method == null) {
+                return null;
+            }
+            method.setAccessible(true);
+            return method.invoke(null, objects);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static <T> T fieldStatic(Class clazz, String name, Object value) {
+        if (clazz == null) {
+            return null;
+        }
+        try {
+            Field field = clazz.getDeclaredField(name);
+            if (field == null) {
+                return null;
+            }
+            field.setAccessible(true);
+            Object oldValue = field.get(null);
+            field.set(null, value);
+            return (T) oldValue;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+
     }
 
 }
