@@ -29,8 +29,8 @@ if (rootProject.ext.android_jar_path == null) {
 task proguard(type: proguard.gradle.ProGuardTask, dependsOn: jar) {
 
     injars 'build/libs'
-    outjars 'out/proguard'
-    delete files("out/proguard")
+    outjars 'build/proguard'
+    delete files("build/proguard")
 
     def proguardConfig = file('proguard-rules.pro')
     if (proguardConfig.exists()) {
