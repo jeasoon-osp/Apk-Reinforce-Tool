@@ -8,7 +8,7 @@ compileJava {
     dependsOn ":DexShell:assembleDex"
     doLast {
         copy {
-            from "${project(":DexShell").projectDir.absolutePath}/out/dex/classes.dex"
+            from "${project(":DexShell").projectDir.absolutePath}/build/dex/classes.dex"
             into "$projectDir.absolutePath/src/main/resources/apk/dex/"
         }
     }
