@@ -38,8 +38,20 @@ public class ManifestProcessor {
         try {
             Document document = reader.read(srcAxmlFile.file());
             Element root = document.getRootElement();
+            Attribute attrCompileSdkVersion = root.attribute("compileSdkVersion");
+            Attribute attrCompileSdkVersionCodename = root.attribute("compileSdkVersionCodename");
+            if (attrCompileSdkVersion != null) {
+                root.remove(attrCompileSdkVersion);
+            }
+            if (attrCompileSdkVersionCodename != null) {
+                root.remove(attrCompileSdkVersionCodename);
+            }
             Element application = root.element("application");
             Namespace androidNbsp = root.getNamespaceForPrefix("android");
+            Attribute attrAppComponentFactory = application.attribute("appComponentFactory");
+            if (attrAppComponentFactory != null) {
+                application.remove(attrAppComponentFactory);
+            }
             Attribute nameAttr = application.attribute("name");
             String applicationName = null;
             if (nameAttr != null) {

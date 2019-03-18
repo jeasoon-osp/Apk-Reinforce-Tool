@@ -10,8 +10,6 @@ import org.jeson.reinforcetool.log.Logger;
 import org.jeson.reinforcetool.util.FileUtil;
 
 import java.io.FileFilter;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -61,13 +59,12 @@ public class ApkProcessor implements ErrorCode {
     }
 
     private String[] buildEncodeArgs(String appDir, String outApkPath) {
-        return new String[]{"b", "-f", "-o", outApkPath, appDir};
+        return new String[]{"b", "-f", "--use-aapt2", "-o", outApkPath, appDir};
     }
 
     public File getAppOutDir() {
         return tmpOutDir;
     }
-
 
     public boolean cleanWorkspace(String... exclude) {
         return FileUtil.delete(workspaceDir, exclude);
