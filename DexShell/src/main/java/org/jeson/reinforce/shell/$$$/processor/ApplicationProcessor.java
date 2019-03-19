@@ -2,6 +2,8 @@ package org.jeson.reinforce.shell.$$$.processor;
 
 import android.app.Application;
 import android.app.Instrumentation;
+import android.content.ComponentCallbacks;
+import android.content.ContentProvider;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import org.jeson.reinforce.shell.$$$.util.ApplicationUtil;
@@ -10,6 +12,7 @@ import org.jeson.reinforce.shell.$$$.util.Util;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -49,25 +52,26 @@ public abstract class ApplicationProcessor {
     }
 
     public void onAppCreate(Application application) {
-        Application mainApp = replaceApplication(ApplicationUtil.getMainAppClassName());
+        Application mainApp = replaceApplication(application, ApplicationUtil.getMainAppClassName());
         if (mainApp != null) {
             mainApp.onCreate();
         }
     }
 
-    private Application replaceApplication(String mainClassName) {
+    @SuppressWarnings("all")
+    private Application replaceApplication(Application application, String mainClassName) {
         if (Util.isEmptyText(mainClassName)) {
             return null;
         }
         Object currentActivityThread = ApplicationUtil.getActivityThread();
-        Object boundApplication      = ReflectUtil.field(currentActivityThread, "mBoundApplication");
-        Object loadedApkInfo         = ApplicationUtil.getLoadedApk();
+        Object boundApplication = ReflectUtil.field(currentActivityThread, "mBoundApplication");
+        Object loadedApkInfo = ApplicationUtil.getLoadedApk();
         ReflectUtil.field(loadedApkInfo, "mApplication", null);
         Application initialApplication = (Application) ReflectUtil.field(currentActivityThread, "mInitialApplication");
-        List        allApplications    = (List) ReflectUtil.field(currentActivityThread, "mAllApplications");
+        List allApplications = (List) ReflectUtil.field(currentActivityThread, "mAllApplications");
         allApplications.remove(initialApplication);
         ApplicationInfo applicationInfo = ApplicationUtil.getApplicationInfo();
-        ApplicationInfo appInfo         = (ApplicationInfo) ReflectUtil.field(boundApplication, "appInfo");
+        ApplicationInfo appInfo = (ApplicationInfo) ReflectUtil.field(boundApplication, "appInfo");
         applicationInfo.className = mainClassName;
         appInfo.className = mainClassName;
         Application mainApplication = (Application) ReflectUtil.invoke(loadedApkInfo, "makeApplication", new Class[]{boolean.class, Instrumentation.class}, new Object[]{false, null});
@@ -78,18 +82,33 @@ public abstract class ApplicationProcessor {
             if (localProvider == null) {
                 continue;
             }
-            Field[] fields = localProvider.getClass().getDeclaredFields();
+            Field[] fields = ContentProvider.class.getDeclaredFields();
             for (Field field : fields) {
                 if (Context.class.getName().equals(field.getType().getName())) {
                     try {
                         field.setAccessible(true);
                         field.set(localProvider, mainApplication);
-                    } catch (IllegalAccessException e) {
+                    } catch (IllegalAccessException ignored) {
                     }
                 }
 
             }
         }
+        ArrayList<Application.OnProvideAssistDataListener> assistCallbacks = (ArrayList<Application.OnProvideAssistDataListener>) ReflectUtil.field(application, "mAssistCallbacks");
+        ArrayList<ComponentCallbacks> componentCallbacks = (ArrayList<ComponentCallbacks>) ReflectUtil.field(application, "mComponentCallbacks");
+        ArrayList<Application.ActivityLifecycleCallbacks> activityLifecycleCallbacks = (ArrayList<Application.ActivityLifecycleCallbacks>) ReflectUtil.field(application, "mActivityLifecycleCallbacks");
+        if (assistCallbacks != null) {
+            ReflectUtil.field(mainApplication, "mAssistCallbacks", assistCallbacks);
+        }
+        if (componentCallbacks != null) {
+            ReflectUtil.field(mainApplication, "mComponentCallbacks", componentCallbacks);
+        }
+        if (activityLifecycleCallbacks != null) {
+            ReflectUtil.field(mainApplication, "mActivityLifecycleCallbacks", activityLifecycleCallbacks);
+        }
+        ReflectUtil.field(application, "mAssistCallbacks", new ArrayList<Application.OnProvideAssistDataListener>());
+        ReflectUtil.field(application, "mComponentCallbacks", new ArrayList<ComponentCallbacks>());
+        ReflectUtil.field(application, "mActivityLifecycleCallbacks", new ArrayList<Application.ActivityLifecycleCallbacks>());
         return mainApplication;
     }
 
