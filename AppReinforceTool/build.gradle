@@ -20,6 +20,7 @@ compileJava {
 clean.doLast {
     file("${projectDir.absolutePath}/src/main/resources/tool/ApkReinforceTool.jar").delete()
     file("${projectDir.absolutePath}/tool/buildExe/ApkReinforceTool.jar").delete()
+    file("$rootDir.absolutePath/Artifacts/ApkReinforceTool").deleteDir()
 }
 
 jar {
@@ -37,6 +38,22 @@ jar {
 
 task assembleApp(dependsOn: "assemble", group: "build") {
     doLast {
+        copy {
+            from "$projectDir.absolutePath/tool/buildExe/ApkReinforceTool.jar"
+            into "$rootDir.absolutePath/Artifacts/ApkReinforceTool/libs/"
+        }
+        copy {
+            from "$projectDir.absolutePath/tool/buildExe/res/app_icon.png"
+            into "$rootDir.absolutePath/Artifacts/ApkReinforceTool/icon/"
+        }
+        copy {
+            from "$projectDir.absolutePath/tool/buildExe/ApkReinforceTool.sh"
+            into "$rootDir.absolutePath/Artifacts/ApkReinforceTool/"
+        }
+        copy {
+            from "$projectDir.absolutePath/tool/buildExe/ApkReinforceTool.bat"
+            into "$rootDir.absolutePath/Artifacts/ApkReinforceTool/"
+        }
         println "assemble app success"
     }
 }
