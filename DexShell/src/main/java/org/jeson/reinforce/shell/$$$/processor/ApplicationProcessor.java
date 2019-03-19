@@ -94,21 +94,24 @@ public abstract class ApplicationProcessor {
 
             }
         }
+        Context baseContext = application.getBaseContext();
+        ReflectUtil.field(mainApplication, "mBase", baseContext);
+        ReflectUtil.invoke(baseContext, "setOuterContext", new Class[]{Context.class}, new Object[]{mainApplication});
         ArrayList<Application.OnProvideAssistDataListener> assistCallbacks = (ArrayList<Application.OnProvideAssistDataListener>) ReflectUtil.field(application, "mAssistCallbacks");
         ArrayList<ComponentCallbacks> componentCallbacks = (ArrayList<ComponentCallbacks>) ReflectUtil.field(application, "mComponentCallbacks");
         ArrayList<Application.ActivityLifecycleCallbacks> activityLifecycleCallbacks = (ArrayList<Application.ActivityLifecycleCallbacks>) ReflectUtil.field(application, "mActivityLifecycleCallbacks");
         if (assistCallbacks != null) {
             ReflectUtil.field(mainApplication, "mAssistCallbacks", assistCallbacks);
+            ReflectUtil.field(application, "mAssistCallbacks", new ArrayList<Application.OnProvideAssistDataListener>());
         }
         if (componentCallbacks != null) {
             ReflectUtil.field(mainApplication, "mComponentCallbacks", componentCallbacks);
+            ReflectUtil.field(application, "mComponentCallbacks", new ArrayList<ComponentCallbacks>());
         }
         if (activityLifecycleCallbacks != null) {
             ReflectUtil.field(mainApplication, "mActivityLifecycleCallbacks", activityLifecycleCallbacks);
+            ReflectUtil.field(application, "mActivityLifecycleCallbacks", new ArrayList<Application.ActivityLifecycleCallbacks>());
         }
-        ReflectUtil.field(application, "mAssistCallbacks", new ArrayList<Application.OnProvideAssistDataListener>());
-        ReflectUtil.field(application, "mComponentCallbacks", new ArrayList<ComponentCallbacks>());
-        ReflectUtil.field(application, "mActivityLifecycleCallbacks", new ArrayList<Application.ActivityLifecycleCallbacks>());
         return mainApplication;
     }
 
