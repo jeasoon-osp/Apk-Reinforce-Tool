@@ -1,7 +1,6 @@
 package org.jeson.reinforce.view.frame;
 
 import org.jeson.reinforce.resource.Resources;
-import org.jeson.reinforce.util.FileUtil;
 import org.jeson.reinforce.util.Util;
 
 import javax.swing.*;
@@ -9,15 +8,8 @@ import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.Closeable;
 import java.io.File;
-import java.io.InputStream;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class ReinforceFrame extends JFrame implements ActionListener {
 
@@ -54,6 +46,7 @@ public class ReinforceFrame extends JFrame implements ActionListener {
         initData();
         initView();
         setVisible(show);
+        setLocation();
     }
 
     private void initContent() {
@@ -153,6 +146,11 @@ public class ReinforceFrame extends JFrame implements ActionListener {
         add(btnDstFileChooser);
         add(btnAction);
         add(jScrollPane);
+    }
+
+    private void setLocation() {
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        setLocation(screenSize.width / 2 - 245, screenSize.height / 2 - 245);
     }
 
     @Override
