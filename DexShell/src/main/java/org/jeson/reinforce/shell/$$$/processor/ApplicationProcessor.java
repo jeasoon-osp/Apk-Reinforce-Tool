@@ -2,7 +2,6 @@ package org.jeson.reinforce.shell.$$$.processor;
 
 import android.app.Application;
 import android.app.Instrumentation;
-import android.content.ComponentCallbacks;
 import android.content.ContentProvider;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -97,22 +96,25 @@ public abstract class ApplicationProcessor {
         Context baseContext = application.getBaseContext();
         ReflectUtil.field(mainApplication, "mBase", baseContext);
         ReflectUtil.invoke(baseContext, "setOuterContext", new Class[]{Context.class}, new Object[]{mainApplication});
-        ArrayList<Application.OnProvideAssistDataListener> assistCallbacks = (ArrayList<Application.OnProvideAssistDataListener>) ReflectUtil.field(application, "mAssistCallbacks");
-        ArrayList<ComponentCallbacks> componentCallbacks = (ArrayList<ComponentCallbacks>) ReflectUtil.field(application, "mComponentCallbacks");
-        ArrayList<Application.ActivityLifecycleCallbacks> activityLifecycleCallbacks = (ArrayList<Application.ActivityLifecycleCallbacks>) ReflectUtil.field(application, "mActivityLifecycleCallbacks");
-        if (assistCallbacks != null) {
-            ReflectUtil.field(mainApplication, "mAssistCallbacks", assistCallbacks);
-            ReflectUtil.field(application, "mAssistCallbacks", new ArrayList<Application.OnProvideAssistDataListener>());
-        }
-        if (componentCallbacks != null) {
-            ReflectUtil.field(mainApplication, "mComponentCallbacks", componentCallbacks);
-            ReflectUtil.field(application, "mComponentCallbacks", new ArrayList<ComponentCallbacks>());
-        }
-        if (activityLifecycleCallbacks != null) {
-            ReflectUtil.field(mainApplication, "mActivityLifecycleCallbacks", activityLifecycleCallbacks);
-            ReflectUtil.field(application, "mActivityLifecycleCallbacks", new ArrayList<Application.ActivityLifecycleCallbacks>());
-        }
+        replaceListField(application, mainApplication, "mAssistCallbacks");
+        replaceListField(application, mainApplication, "mComponentCallbacks");
+        replaceListField(application, mainApplication, "mActivityLifecycleCallbacks");
         return mainApplication;
+    }
+
+    @SuppressWarnings("all")
+    private void replaceListField(Object oldObj, Object newObj, String fieldName) {
+        ArrayList oldList = (ArrayList) ReflectUtil.field(oldObj, fieldName);
+        ArrayList newList = (ArrayList) ReflectUtil.field(newObj, fieldName);
+
+        if (oldList != null) {
+            if (newList != null) {
+                newList.addAll(oldList);
+            } else {
+                ReflectUtil.field(newObj, fieldName, new ArrayList<>(oldList));
+            }
+            oldList.clear();
+        }
     }
 
 }

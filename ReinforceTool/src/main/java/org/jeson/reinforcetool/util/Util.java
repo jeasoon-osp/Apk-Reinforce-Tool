@@ -6,19 +6,19 @@ package org.jeson.reinforcetool.util;
  */
 
 public class Util {
-    public static final int OS_WIN   = 0;
-    public static final int OS_MAC   = 1;
+    public static final int OS_WIN = 0;
+    public static final int OS_MAC = 1;
     public static final int OS_LINUX = 2;
 
     private Util() {
     }
 
     public static String cmd(String[] args) {
-        String cmd = "";
+        StringBuilder sb = new StringBuilder();
         for (String arg : args) {
-            cmd += arg + " ";
+            sb.append(arg).append(" ");
         }
-        return cmd;
+        return sb.toString();
     }
 
     public static String formatTime(long time) {
@@ -28,10 +28,10 @@ public class Util {
         if (time > 60 * 60 * 1000) {
             return "more than one hour";
         }
-        String minutes      = "";
-        String seconds      = "";
+        String minutes = "";
+        String seconds = "";
         String milliseconds = "";
-        long   temp;
+        long temp;
         temp = time % 1000;
         if (temp > 0) {
             milliseconds = temp + " milliseconds ";
@@ -81,7 +81,7 @@ public class Util {
             arch = "x86";
         }
         String osName;
-        int    os = getOsType();
+        int os = getOsType();
         if (os == OS_WIN) {
             osName = "win";
         } else if (os == OS_MAC) {
