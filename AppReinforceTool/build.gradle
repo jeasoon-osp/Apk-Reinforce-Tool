@@ -47,13 +47,14 @@ task assembleApp(dependsOn: "assemble", group: "build") {
             into "$rootDir.absolutePath/Artifacts/ApkReinforceTool/icon/"
         }
         copy {
-            from "$projectDir.absolutePath/tool/buildExe/ApkReinforceTool.sh"
+            from "$projectDir.absolutePath/tool/buildExe/ApkReinforceTool"
             into "$rootDir.absolutePath/Artifacts/ApkReinforceTool/"
         }
         copy {
             from "$projectDir.absolutePath/tool/buildExe/ApkReinforceTool.bat"
             into "$rootDir.absolutePath/Artifacts/ApkReinforceTool/"
         }
+        file("$rootDir.absolutePath/Artifacts/ApkReinforceTool/ApkReinforceTool").setExecutable(true, false)
         println "assemble app success"
     }
 }
